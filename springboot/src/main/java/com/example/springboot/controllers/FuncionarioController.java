@@ -1,0 +1,79 @@
+package com.example.springboot.controllers;
+
+import com.example.springboot.dtos.FuncionarioRecordDto;
+import com.example.springboot.models.FuncionarioModel;
+import com.example.springboot.repositories.FuncionarioRepository;
+import jakarta.validation.Valid;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@RestController
+public class FuncionarioController {
+
+    @Autowired
+    FuncionarioRepository funcionarioRepository;
+    //Permite a inserção dos métodos JPA
+
+    @PostMapping("/funcionarios")
+    public ResponseEntity<FuncionarioModel> addFunc(@RequestBody @Valid FuncionarioModel funcionarioRecordDto) {
+        var funcionarioModel = new FuncionarioModel(); //Usar o var evita ter que colocar ProductModel productModel = new ProductModel();
+        BeanUtils.copyProperties(funcionarioRecordDto, funcionarioModel); //Recebe o que vai ser convertido e o tipo que vai ser convertido. Recebe o DTO e converter em model
+        return ResponseEntity.status(HttpStatus.CREATED).body(funcionarioRepository.save(funcionarioModel));//Como o método é de inserção(Criação) no banco, utilizo o método created (201) do HttpStatus
+    }
+
+    @GetMapping("/funcionarios")
+    public ResponseEntity<List<FuncionarioModel>> getAllFuncs() {
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioRepository.findAll());
+    }
+
+    @GetMapping("/funcionarios/{id}")
+    public ResponseEntity<Object> getOneFunc(@PathVariable(value = "id") UUID id) {
+        Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
+        if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioO.get());
+    }
+
+    @PutMapping("/funcionarios/{id}")
+    public ResponseEntity<Object> updateFunc(@PathVariable(value = "id") UUID id, @RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto){
+        Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
+        if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+//        ProductModel productModel = new ProductModel(); -> Isso não pode ser feito pois já existe um UUID cadastrado para esse produto
+//        Fazer um novo ProductModel, geraria um novo UUID para esse produto.
+        FuncionarioModel funcionarioModel = funcionarioO.get();
+        BeanUtils.copyProperties(funcionarioRecordDto, funcionarioModel);
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioRepository.save(funcionarioModel));
+    }
+
+    @DeleteMapping("/funcionarios/{id}")
+    public ResponseEntity<Object> deleteFunc(@PathVariable(value = "id") UUID id) {
+        Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
+
+        if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        funcionarioRepository.delete(funcionarioO.get());
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
+    }
+
+    //Daqui para baixo serão métodos que eu criei para testar o funcionamento da api
+
+//    @GetMapping("/products/total")
+//    public ResponseEntity<BigDecimal> getTotalProducts() {
+//        BigDecimal sum = productRepository.getSum();
+//        return ResponseEntity.status(HttpStatus.OK).body(sum);
+//    }
+
+}
