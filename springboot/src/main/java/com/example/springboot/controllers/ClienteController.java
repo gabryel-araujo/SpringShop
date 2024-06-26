@@ -8,6 +8,7 @@ import com.example.springboot.repositories.ClienteRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,4 +68,21 @@ public class ClienteController {
         return ResponseEntity.status(HttpStatus.OK).body("Client deleted successfully");
     }
 
+    @GetMapping("/clientes/nome/{nome}")
+    public ResponseEntity<Object> getManyClientsByName(@PathVariable(value = "nome") String nome) {
+        List<ClienteModel> clienteModel = clienteRepository.findByNome(nome);
+        if (clienteModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(clienteModel);
+    }
+
+    @GetMapping("/clientes/ordenados")
+    public ResponseEntity<Object> getManyClientsOrderByNomeAsc() {
+        List<ClienteModel> clienteModel = clienteRepository.findAllOrderByNomeAsc();
+        if (clienteModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(clienteModel);
+    }
 }

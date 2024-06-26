@@ -4,8 +4,10 @@ import com.example.springboot.dtos.AtendimentoRecordDto;
 import com.example.springboot.dtos.ClienteRecordDto;
 import com.example.springboot.models.AtendimentoModel;
 import com.example.springboot.models.ClienteModel;
+import com.example.springboot.models.FuncionarioModel;
 import com.example.springboot.repositories.AtendimentoRepository;
 import com.example.springboot.repositories.ClienteRepository;
+import com.example.springboot.repositories.FuncionarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,32 @@ public class AtendimentoController {
     @Autowired
     AtendimentoRepository atendimentoRepository;
 
+    @Autowired
+    private FuncionarioRepository funcionarioRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     @PostMapping("/atendimentos")
-    public ResponseEntity<AtendimentoModel> addService(@RequestBody @Valid AtendimentoModel atendimentoRecordDto){
+    public ResponseEntity<AtendimentoModel> addService(@RequestBody @Valid AtendimentoRecordDto atendimentoRecordDto){
+        //Buscando o funcionario
+        Optional<FuncionarioModel> funcionarioOptional = funcionarioRepository.findById(UUID.fromString(atendimentoRecordDto.id_funcionario()));
+
+        if (funcionarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        //Buscando o cliente
+        Optional<ClienteModel> clienteOptional = clienteRepository.findById(UUID.fromString(atendimentoRecordDto.id_cliente()));
+
+        if (clienteOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
         AtendimentoModel atendimentoModel = new AtendimentoModel();
         BeanUtils.copyProperties(atendimentoRecordDto, atendimentoModel);
+        atendimentoModel.setFuncionario(funcionarioOptional.get());
+        atendimentoModel.setCliente(clienteOptional.get());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoRepository.save(atendimentoModel));
     }
@@ -66,5 +90,23 @@ public class AtendimentoController {
 
         atendimentoRepository.delete(atendimentoO.get());
         return ResponseEntity.status(HttpStatus.OK).body("Service deleted successfully");
+    }
+
+    @GetMapping("/atendimentos/cliente/{id_cliente}")
+    public ResponseEntity<Object> getManyServicesByIdCliente(@PathVariable(value = "id_cliente") UUID id_cliente, @RequestParam(value = "data") String data){
+        List<AtendimentoModel> atendimentoModel = atendimentoRepository.findByIdCliente(id_cliente,data);
+        if (atendimentoModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoModel);
+    }
+
+    @PutMapping("/atendimentos/updateLink")
+    public ResponseEntity<Object> updateLinkRelatorio(@RequestParam(value = "link") String link, @RequestParam(value = "id") UUID id){
+        int updated = atendimentoRepository.updateLinkRelatorio(link, id);
+        if (updated == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Service updated successfully");
     }
 }

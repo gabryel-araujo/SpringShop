@@ -25,6 +25,8 @@ public class FuncionarioModel implements Serializable{
 
     private int visitas = 0;
 
+    private String status = "ativo";
+
     public UUID getId() {
         return id;
     }
@@ -79,5 +81,13 @@ public class FuncionarioModel implements Serializable{
 
     public void setVisitas(int visitas) {
         this.visitas = visitas;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
