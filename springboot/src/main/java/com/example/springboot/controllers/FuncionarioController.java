@@ -1,6 +1,7 @@
 package com.example.springboot.controllers;
 
 import com.example.springboot.dtos.FuncionarioRecordDto;
+import com.example.springboot.dtos.FuncionarioSumaryDto;
 import com.example.springboot.models.FuncionarioModel;
 import com.example.springboot.repositories.FuncionarioRepository;
 import jakarta.validation.Valid;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 public class FuncionarioController {
@@ -34,7 +34,7 @@ public class FuncionarioController {
     }
 
     @GetMapping("/funcionarios/{id}")
-    public ResponseEntity<Object> getOneFunc(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> getOneFunc(@PathVariable(value = "id") int id) {
         Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
         if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -43,21 +43,21 @@ public class FuncionarioController {
     }
 
     @PutMapping("/funcionarios/{id}")
-    public ResponseEntity<Object> updateFunc(@PathVariable(value = "id") UUID id, @RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto){
+    public ResponseEntity<Object> updateFunc(@PathVariable(value = "id") int id, @RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto){
         Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
         if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-//        ProductModel productModel = new ProductModel(); -> Isso não pode ser feito pois já existe um UUID cadastrado para esse produto
-//        Fazer um novo ProductModel, geraria um novo UUID para esse produto.
+//        ProductModel productModel = new ProductModel(); -> Isso não pode ser feito pois já existe um int cadastrado para esse produto
+//        Fazer um novo ProductModel, geraria um novo int para esse produto.
         FuncionarioModel funcionarioModel = funcionarioO.get();
         BeanUtils.copyProperties(funcionarioRecordDto, funcionarioModel);
         return ResponseEntity.status(HttpStatus.OK).body(funcionarioRepository.save(funcionarioModel));
     }
 
     @DeleteMapping("/funcionarios/{id}")
-    public ResponseEntity<Object> deleteFunc(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> deleteFunc(@PathVariable(value = "id") int id) {
         Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findById(id);
 
         if (funcionarioO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
@@ -68,12 +68,37 @@ public class FuncionarioController {
         return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }
 
-    //Daqui para baixo serão métodos que eu criei para testar o funcionamento da api
+    @GetMapping("funcionarios/funcionario/{email}")
+    public ResponseEntity<Object> getFuncByEmail(@PathVariable(value = "email") String email){
+        Optional<FuncionarioModel> funcionarioO = funcionarioRepository.findByEmail(email);
 
-//    @GetMapping("/products/total")
-//    public ResponseEntity<BigDecimal> getTotalProducts() {
-//        BigDecimal sum = productRepository.getSum();
-//        return ResponseEntity.status(HttpStatus.OK).body(sum);
-//    }
+        if(funcionarioO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioO.get());
+    }
+
+    @GetMapping("funcionarios/dados")
+    public ResponseEntity<Object> getFuncByNameAndRole(){
+        List<FuncionarioSumaryDto> funcionarioO = funcionarioRepository.findByNameAndRole();
+
+        if(funcionarioO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioO);
+    }
+
+    @GetMapping("funcionarios/visitas")
+    public ResponseEntity<Object> getFuncOrderByVisitas(){
+        List<FuncionarioModel> funcionarioO = funcionarioRepository.findFuncionariosOrderByVisitas();
+
+        if(funcionarioO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioO);
+    }
 
 }

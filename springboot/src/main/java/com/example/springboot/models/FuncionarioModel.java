@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "funcionario")
@@ -14,7 +13,7 @@ public class FuncionarioModel implements Serializable{
         //Atributos da classe(Colunas da tabela)
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
-        private UUID id;
+        private int id;
     private String nome;
     private String email;
     private String senha;
@@ -27,11 +26,11 @@ public class FuncionarioModel implements Serializable{
 
     private String status = "ativo";
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 

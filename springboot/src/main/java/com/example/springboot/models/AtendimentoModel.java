@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "atendimentos")
@@ -14,7 +13,7 @@ public class AtendimentoModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private int id;
 
     private String checkin = null;
 
@@ -30,11 +29,11 @@ public class AtendimentoModel implements Serializable {
 
     private String link_relatorio;
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 

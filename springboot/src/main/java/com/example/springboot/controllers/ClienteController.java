@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 public class ClienteController {
@@ -36,7 +35,7 @@ public class ClienteController {
     }
 
     @GetMapping("/clientes/{id}")
-    public ResponseEntity<Object> getOneClient(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> getOneClient(@PathVariable(value = "id") int id) {
         Optional<ClienteModel> clienteO = clienteRepository.findById(id);
         if (clienteO.isEmpty()) { //Também poderia fazer a lógica inversa utilizando o product0.isPresent()
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
@@ -45,7 +44,7 @@ public class ClienteController {
     }
 
     @PutMapping("/clientes/{id}")
-    public ResponseEntity<Object> updateClient(@PathVariable(value = "id") UUID id, @RequestBody @Valid ClienteRecordDto clienteRecordDto){
+    public ResponseEntity<Object> updateClient(@PathVariable(value = "id") int id, @RequestBody @Valid ClienteRecordDto clienteRecordDto){
         Optional<ClienteModel> clienteO = clienteRepository.findById(id);
         if (clienteO.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
@@ -57,7 +56,7 @@ public class ClienteController {
     }
 
     @DeleteMapping("/clientes/{id}")
-    public ResponseEntity<Object> deleteClient(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> deleteClient(@PathVariable(value = "id") int id) {
         Optional<ClienteModel> clienteO = clienteRepository.findById(id);
 
         if (clienteO.isEmpty()) {
@@ -85,4 +84,32 @@ public class ClienteController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(clienteModel);
     }
+
+    @GetMapping("/clientes/bairro/{bairro}")
+    public ResponseEntity<Object> getManyClientsByBairro(@PathVariable(value = "bairro") String bairro) {
+        List<ClienteModel> clienteModel = clienteRepository.findByBairro(bairro);
+        if (clienteModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(clienteModel);
+    }
+
+    @GetMapping("/clientes/bairro/distinct")
+    public ResponseEntity<Object> getDistinctBairro() {
+        List<String> bairro = clienteRepository.findDistinctBairro();
+        if (bairro == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(bairro);
+    }
+
+    @GetMapping("/clientes")
+    public ResponseEntity<Object> getManyClientsByNomeAndBairro(@PathVariable(value = "nome") String nome, @PathVariable(value = "bairro") String bairro) {
+        List<ClienteModel> clienteModel = clienteRepository.findByNomeAndBairro(nome, bairro);
+        if (clienteModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(clienteModel);
+    }
+
 }

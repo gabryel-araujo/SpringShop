@@ -16,7 +16,7 @@ public class ClienteModel implements Serializable {
     //Atributos da classe(Colunas da tabela)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private int id;
 
     private String nome;
 
@@ -33,11 +33,11 @@ public class ClienteModel implements Serializable {
 
     private LocalDate data_cadastro;
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 
